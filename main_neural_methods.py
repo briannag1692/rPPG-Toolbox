@@ -1,10 +1,11 @@
-""" The main function for the rPPG deep learning pipeline.
+""" The main function of rPPG deep learning pipeline.
 
 TODO: Adds detailed description for models and datasets supported.
 An end-to-end training pipleine for neural network methods.
   Typical usage example:
 
-  python main.py --model_name physnet --data_dir "G:\\UBFC_data"
+  python main_neural_methods.py --config_file configs/COHFACE_PHYSNET_BASIC.yaml --data_path "G:\\COHFACE" --preprocess
+  python main_neural_methods.py --config_file configs/TSCAN_COHFACE_BASIC.yaml --data_path "G:\\COHFACE"
 """
 
 import argparse
@@ -55,10 +56,8 @@ def get_PURE_data(config):
 
 def add_args(parser):
     """Adds arguments for parser."""
-    parser.add_argument('--config_file', required=False, default="configs/COHFACE_PHYSNET_BASIC.yaml",type=str, help="The name of the model.")
-    parser.add_argument('--model_name', default=None, type=str, help="The name of the model.")
-    parser.add_argument('--dataset', default=None, choices=["COHFACE", "PURE", "UBFC"], type=str,
-                        help="The Dataset. Supporting UBFC/PURE/COHFACE.")
+    parser.add_argument('--config_file', required=False,
+                        default="configs/COHFACE_PHYSNET_BASIC.yaml", type=str, help="The name of the model.")
     parser.add_argument('--do_train', action='store_true')
     parser.add_argument(
         '--device',
@@ -70,6 +69,7 @@ def add_args(parser):
                         type=str, help='The path of the data directory.')
     parser.add_argument('--epochs', default=None, type=int)
     parser.add_argument('--log_path', default=None, type=str)
+    parser.add_argument('--model_dir', default=None, type=str)
     return parser
 
 
@@ -108,7 +108,8 @@ if __name__ == "__main__":
         data_files = get_PURE_data(config)
         loader = data_loader.PURELoader.PURELoader
     else:
-        raise ValueError("Unsupported dataset! Currently supporting COHFACE, UBFC and PURE.")
+        raise ValueError(
+            "Unsupported dataset! Currently supporting COHFACE, UBFC and PURE.")
 
     train_data = loader(
         name="train",

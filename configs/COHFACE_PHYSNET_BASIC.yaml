@@ -5,8 +5,8 @@ DATA:
   DO_PREPROCESS: False
   DATA_FORMAT: NCDHW
   PREPROCESS :
-    DATA_TYPE : Raw
-    LABEL_TYPE : Normalized
+    DATA_TYPE : ['Raw']
+    LABEL_TYPE : Raw
     CLIP_LENGTH: 64
     CROP_FACE: True
     H: 128
@@ -16,7 +16,7 @@ LOG:
   PATH: runs/exp
 MODEL:
   DROP_RATE: 0.2
-  MODEL_PATH: store_model
+  MODEL_DIR: store_model
   NAME: Physnet
   PHYSNET:
     FRAME_NUM: 64
@@ -24,3 +24,4 @@ TRAIN:
   BATCH_SIZE: 4
   EPOCHS: 50
   LR: 0.0001
+  MODEL_FILE_NAME: physnet.pth
