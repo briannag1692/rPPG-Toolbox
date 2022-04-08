@@ -1,12 +1,14 @@
 BASE: ['']
 DATA:
+  FS: 20
   CACHED_PATH: preprocessed
   DATASET: COHFACE
   DO_PREPROCESS: False
   DATA_FORMAT: NCDHW
   PREPROCESS :
-    DATA_TYPE : Raw
+    DATA_TYPE : ['Raw']
     LABEL_TYPE : Normalized
+    DO_CHUNK : True
     CLIP_LENGTH: 64
     CROP_FACE: True
     H: 128
@@ -20,6 +22,8 @@ MODEL:
     FRAME_NUM: 64
 INFERENCE:
   MODEL_PATH: store_model/physnet.pth
-  BATCH_SIZE: 4
+  BATCH_SIZE: 1
+TEST:
+  METRICS: ['MAE','RMSE']
 
 
