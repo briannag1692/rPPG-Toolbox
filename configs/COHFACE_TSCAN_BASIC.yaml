@@ -1,11 +1,11 @@
 BASE: ['']
 DATA:
-  CACHED_PATH: preprocessed
+  CACHED_PATH: preprocess
   DATASET: COHFACE
   DO_PREPROCESS: False
   DATA_FORMAT: NDCHW
   PREPROCESS:
-    DATA_TYPE: ['Standardized','Normalized' ]
+    DATA_TYPE: ['Normalized','Standardized']
     LABEL_TYPE: Normalized
     CLIP_LENGTH: 64
     CROP_FACE: True
