@@ -2,7 +2,7 @@
 
 from neural_methods.trainer.BaseTrainer import BaseTrainer
 import torch
-from neural_methods.model.ts_can import TSCAN
+from neural_methods.model.TS_CAN import TSCAN
 from neural_methods.loss.NegPearsonLoss import Neg_Pearson
 import torch.optim as optim
 import numpy as np
@@ -18,14 +18,15 @@ class TscanTrainer(BaseTrainer):
         super().__init__()
         self.device = torch.device(config.DEVICE)
         self.frame_depth = config.MODEL.TSCAN.FRAME_DEPTH
-        self.model = TSCAN(frame_depth=self.frame_depth,
-                           img_size=config.DATA.PREPROCESS.H).to(self.device)
+        self.model = TSCAN(frame_depth=self.frame_depth, img_size=config.DATA.PREPROCESS.H).to(self.device)
+        self.model = torch.nn.DataParallel(self.model, device_ids=list(range(config.NUM_OF_GPU_TRAIN)))
         self.criterion = torch.nn.MSELoss()
-        self.optimizer = optim.Adam(
-            self.model.parameters(), lr=config.TRAIN.LR)
+        self.optimizer = optim.AdamW(
+            self.model.parameters(), lr=config.TRAIN.LR, weight_decay=10)
         self.max_epoch_num = config.TRAIN.EPOCHS
         self.model_dir = config.MODEL.MODEL_DIR
         self.model_file_name = config.TRAIN.MODEL_FILE_NAME
+        self.batch_size = config.TRAIN.BATCH_SIZE
 
     def train(self, data_loader):
         """ TODO:Docstring"""
@@ -37,7 +38,6 @@ class TscanTrainer(BaseTrainer):
             self.model.train()
             # Model Training
             tbar = tqdm(data_loader["train"], ncols=80)
-
             for idx, batch in enumerate(tbar):
                 tbar.set_description("Train epoch %s" % epoch)
                 data, labels = batch[0].to(
@@ -55,7 +55,7 @@ class TscanTrainer(BaseTrainer):
                 running_loss += loss.item()
                 if idx % 100 == 99:  # print every 100 mini-batches
                     print(
-                        f'[{epoch + 1}, {idx + 1:5d}] loss: {running_loss / 2000:.3f}')
+                        f'[{epoch + 1}, {idx + 1:5d}] loss: {running_loss / 100:.3f}')
                     running_loss = 0.0
                 train_loss.append(loss.item())
                 tbar.set_postfix(loss=loss.item())
@@ -68,10 +68,10 @@ class TscanTrainer(BaseTrainer):
 
     def valid(self, data_loader):
         """ Model evaluation on the validation dataset."""
-        if data_loader["valid"] == None:
+        if data_loader["valid"] is None:
             print("No data for valid")
             return -1
-        print(" ====Validating===")
+        print("===Validating===")
         valid_loss = []
         self.model.eval()
         valid_step = 0
@@ -98,7 +98,7 @@ class TscanTrainer(BaseTrainer):
 
     def test(self, data_loader):
         """ Model evaluation on the testing dataset."""
-        print(" ====Testing===")
+        print("===Testing===")
         predictions = list()
         labels = list()
         self.model.eval()
